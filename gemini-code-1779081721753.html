@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kolb's Learning Style 學習風格分析風格分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2b5876;
+            --secondary-color: #4e4376;
+            --accent-color: #ff6b6b;
+            --bg-color: #f7f9fa;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .instructions {
+            background-color: #eef2f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .instructions ul {
+            margin: 5px 0 0 20px;
+            padding: 0;
+        }
+
+        .quiz-item {
+            margin-bottom: 35px;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 25px;
+        }
+
+        .quiz-question {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+
+        .options-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .options-table th, .options-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .options-table th {
+            background-color: #f8f9fa;
+            font-size: 0.9rem;
+        }
+
+        .options-table td.option-text {
+            text-align: left;
+            width: 40%;
+            font-size: 0.95rem;
+        }
+
+        .error-msg {
+            color: var(--accent-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        #result-section {
+            display: none;
+            margin-top: 40px;
+            border-top: 3px double var(--primary-color);
+            padding-top: 30px;
+        }
+
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .chart-box {
+            flex: 1;
+            min-width: 350px;
+            max-width: 420px;
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+
+        .chart-box h3 {
+            text-align: center;
+            margin-top: 0;
+            color: #444;
+        }
+
+        .scores-display {
+            display: flex;
+            justify-content: space-around;
+            background: #f1f3f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .score-tag {
+            text-align: center;
+        }
+
+        .score-tag span {
+            display: block;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .analysis-box {
+            background-color: #fffdf5;
+            border: 1px solid #ffeeba;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+
+        .analysis-title {
+            font-size: 1.4rem;
+            color: #856404;
+            margin-top: 0;
+            border-bottom: 2px solid #ffeeba;
+            padding-bottom: 10px;
+        }
+
+        .style-details h4 {
+            margin: 15px 0 5px 0;
+            color: var(--secondary-color);
+        }
+        
+        .style-details ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Kolb's Learning Style 學習風格問卷</h1>
+    
+    <div class="instructions">
+        <strong>填寫說明：</strong><br>
+        請假設您<strong>「在學習全新知識、全新事物等情況時」</strong>（避免只聚焦一個明確對象）的角度，來考量以下12個問題。 
+        <ul>
+            <li>每一題包含四個選項，請對這四個描述進行自我分析排序。 </li>
+            <li>請填選：<strong>4 = 最像我</strong>、<strong>3 = 次像我</strong>、<strong>2 = 次不像我</strong>、<strong>1 = 最不像我</strong>。 </li>
+            <li><strong>注意：</strong>每一題的四個選項得分<strong>不可重複</strong>（即每題皆須包含 1, 2, 3, 4 四個相異數字）。 [cite: 2, 67]</li>
+        </ul>
+    </div>
+
+    <form id="quiz-form">
+        <div id="questions-container"></div>
+        <button type="button" class="btn-submit" onclick="calculateResult()">送出問卷，生成個人學習風格分析</button>
+    </form>
+
+    <div id="result-section">
+        <h2>📊 您的個人學習風格分析結果</h2>
+        
+        <div class="scores-display">
+            <div class="score-tag">CE (具體經驗) <span id="score-CE">-</span></div>
+            <div class="score-tag">RO (反思觀察) <span id="score-RO">-</span></div>
+            <div class="score-tag">AC (抽象概念) <span id="score-AC">-</span></div>
+            <div class="score-tag">AE (主動體驗) <span id="score-AE">-</span></div>
+        </div>
+
+        <div class="scores-display" style="background-color: #e8f4fd;">
+            <div class="score-tag">橫座標 (AC - CE) <span id="coord-X">-</span></div>
+            <div class="score-tag">縱座標 (AE - RO) <span id="coord-Y">-</span></div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-box">
+                <h3>Kolb 四面向雷達圖</h3>
+                <canvas id="radarChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h3>學習風格九宮格定位</h3>
+                <canvas id="gridChart"></canvas>
+            </div>
+        </div>
+
+        <div class="analysis-box" id="analysis-box">
+            </div>
+    </div>
+</div>
+
+<script>
+    // 12題題目數據定義
+    const questionsData = [
+        { id: 1, text: "01. 當我學習時，When I learn", options: [ { k: "CE", t: "我喜歡加入自己的感受 I like to deal with my feelings" }, { k: "RO", t: "我喜歡觀察與聆聽 I like to watch and listen" }, { k: "AC", t: "我喜歡思考觀念 I like to think about ideas" }, { k: "AE", t: "我喜歡實際操作 I like to be doing things" } ] },
+        { id: 2, text: "02. 我學的最好的時候，是當……I learn best when", options: [ { k: "AE", t: "我努力完成實作 I work hard to get things done" }, { k: "CE", t: "我相信我的直覺與感受 I trust my hunches and feelings" }, { k: "RO", t: "我仔細聆聽與觀察 I listen and watch carefully" }, { k: "AC", t: "我依賴邏輯思考 I rely on logical thinking" } ] },
+        { id: 3, text: "03. 當我學習的時候，When I am learning", options: [ { k: "AC", t: "我是試將事情想通 I tend to reason things out" }, { k: "AE", t: "我對事情是負責的 I am responsible about things" }, { k: "CE", t: "我有強烈的感受與反應 I have strong feelings and reactions" }, { k: "RO", t: "我是安靜、謹慎的 I am quiet and reserved" } ] },
+        { id: 4, text: "04. 我學習是利用……I learn by", options: [ { k: "RO", t: "觀察 watching" }, { k: "AC", t: "思考 thinking" }, { k: "AE", t: "實作 doing" }, { k: "CE", t: "感覺 feeling" } ] },
+        { id: 5, text: "05. 當我學習時，When I learn", options: [ { k: "CE", t: "我能接受新的經驗 I am open to new experiences" }, { k: "RO", t: "我會從各個層面來思考問題 I look at all sides of issues" }, { k: "AC", t: "我喜歡分析事情，並分解成更小的問題 I like to analyze things, break them down into their parts" }, { k: "AE", t: "我喜歡將事物嘗試一下 I like to try things out" } ] },
+        { id: 6, text: "06. 當我學習的時候，When I am learning", options: [ { k: "AE", t: "我是個行動型的人 I am an active person" }, { k: "CE", t: "我是個直覺型的人 I am an intuitive person" }, { k: "RO", t: "我是個觀察型的人 I am an observing person" }, { k: "AC", t: "我是個邏輯型的人 I am a logical person" } ] },
+        { id: 7, text: "07. 我學的最好的時候，是從……I learn best from", options: [ { k: "AC", t: "理論 rational theories" }, { k: "AE", t: "嘗試與練習 a chance to try out and practice" }, { k: "CE", t: "同儕間討論 personal relationships" }, { k: "RO", t: "觀察 observation" } ] },
+        { id: 8, text: "08. 當我學習時，When I learn", options: [ { k: "RO", t: "我會在行動前從容準備 I take my time before acting" }, { k: "AC", t: "我喜歡觀念及理論 I like ideas and theories" }, { k: "AE", t: "我喜歡看到來自個人實作的成果 I like to see results from my work" }, { k: "CE", t: "我覺得自己也參與其中了 I feel personally involved in things" } ] },
+        { id: 9, text: "09. 我學的最好時的時候，是……I learn best when", options: [ { k: "CE", t: "我依賴自己的感覺時 I rely on my feelings" }, { k: "RO", t: "我依賴自己的觀察力時 I rely on my observations" }, { k: "AC", t: "我依賴自己的觀念時 I rely on my ideas" }, { k: "AE", t: "我能嘗試自己做一些事情 I can try things out for myself" } ] },
+        { id: 10, text: "10. 當我學習的時候，When I am learning", options: [ { k: "AE", t: "我是個負責的人 I am a responsible person" }, { k: "CE", t: "我是態度開放的人 I am an accepting person" }, { k: "RO", t: "我是一個審慎的人 I am a reserved person" }, { k: "AC", t: "我是個理智的人 I am a rational person" } ] },
+        { id: 11, text: "11. 當我學習時，When I learn", options: [ { k: "AC", t: "我喜歡評估事物 I evaluate things" }, { k: "AE", t: "我喜歡積極參與 I like to be active" }, { k: "CE", t: "我非常地投入 I get involved" }, { k: "RO", t: "我喜歡觀察 I like to observe" } ] },
+        { id: 12, text: "12. 我學的最好的時候，是當……I learn best when", options: [ { k: "RO", t: "我非常小心時 I am careful" }, { k: "AC", t: "我分析想法時 I analyze ideas" }, { k: "AE", t: "我實際動手做時 I am practical" }, { k: "CE", t: "我接受他人的看法、開放心胸時 I am receptive and open-minded" } ] }
+    ];
+
+    // 九型人格特質文本數據
+    const styleTraits = {
+        "Imagining": { name: "想像型 (Imagining)", desc: "依據觀察和反思經驗來想像可能性。", strong: "察覺人的感受和價值觀、放開心傾聽、善於想像並能處理兩可的情境。", challenge: "做決定、擔任領導統御。", traits: ["透過觀察與反思過去經驗和感受進行學習","具有多元觀點視野的能力","是個好的傾聽者，能辨認出事件、人際關係和團體互動的不同類型並瞭解其意義","被視為關懷人的、接納的、創造的、敏感性的及心胸開闊的人。"] },
+        "Initiating": { name: "啟動型 (Initiating)", desc: "啟動處理經驗和情況的行動。", strong: "將自己投入目標、尋找新的機會、影響並領導其他人。", challenge: "控制衝動行動、傾聽他人的觀點、培養耐心。", traits: ["偏好藉由動手操作或實際生活體驗進行學習","在變動環境下不會陷入過多考慮，具備迅速與決斷行動的能力","比起邏輯分析更傾向以直覺行動；比起自己的技術分析，更依賴他人的經驗資訊","被視為具有自發性、有活力、具備說服力並有勇氣膽量的人。"] },
+        "Experiencing": { name: "經驗型 (Experiencing)", desc: "從經驗中深度參與發現意義。", strong: "建立個人學習網絡、在反思與行動上都具有敏銳直覺、容易接受新的經驗。", challenge: "理解理論、系統性的規劃、批判性的判斷。", traits: ["從深入參與的人生經驗和情境中學習","仰賴對他人或某個情境所得到的感受與回應來學習","對他人的感受有強烈的敏銳度，並特別擅長由此建立有意義的網絡關係","解決問題時往往採取創新非傳統的方式。"] },
+        "Reflecting": { name: "反思型 (Reflecting)", desc: "藉由持續的反思連結經驗與想法的能力。", strong: "反思、觀察(RO)觀點、蒐集資訊、能了解他人發生甚麼狀況、將直覺轉換為明確解釋。", challenge: "採取行動、反芻/沉思、在團體中發聲。", traits: ["使用觀察以及反思作為主要的學習基礎","擁有敏銳的觀察力，能夠了解與辨識事件事實、人際互動中更深層的意義","在別人眼中是安靜、富洞察力、仔細、敏感以及有深度的人","需要時間獨自反思並且理解自己經驗的意義。"] },
+        "Acting": { name: "行動型 (Acting)", desc: "對於目標導向的整合與行動有強烈動機。", strong: "結合技術型知識與人際關係、專注於將事情完成。", challenge: "引導工作小組、花些時間反思、解決對的問題、搜集與分析訊息。", traits: ["目標導向並且專注於將事情完成","擅長將計畫實現、或是根據當下的情況結合自己相關的經驗與抽象概念，測試並找出能夠解決問題的方法","比起反思更喜歡直接行動，有時會在尚未考慮後果以及其他選項的情況下作承諾","被視為精力充沛的、謀略的、負責的人。"] },
+        "Deciding": { name: "決定型 (Deciding)", desc: "使用理論模型來決定問題解決和行動策略。", strong: "解決問題、評估想法與解決方案。", challenge: "設定目標、做出決定、思考框架外的事物、對個人感受的敏銳性、處理混沌不明事務。", traits: ["發現理論與想法的實際運用，有能力解決問題並基於合理性來做決定","有效能且專注，避免被離題的事實轉移焦點，但有時會漏掉重要訊息","喜歡協助他人有效能地解決問題，勝於處理感覺與人際關係","被視為是專注的、務實的、理性的與果斷的人。"] },
+        "Thinking": { name: "思考型 (Thinking)", desc: "嚴謹投入抽象和邏輯性思考。", strong: "邏輯分析、理性選擇、分析量化資料。", challenge: "與人們一起工作、保持開放性思考、迷失在思考中。", traits: ["學習主要透過對抽象式想法、理論與概念的深入探索","享受處理數字和需要抽象推理與分析技巧的心智活動","可以獨立工作、傾向處理技術性任務而勝過個人議題","看重老師在其領域的專業權威性。"] },
+        "Analyzing": { name: "分析型 (Analyzing)", desc: "經由反思來整合想法成簡要的模型和系統。", strong: "組織資訊、展現邏輯性與理性、建立觀念模型。", challenge: "嘗試冒險、與他人交際、處理無架構的狀況。", traits: ["擅長接收廣泛資訊並化為簡潔而有邏輯的形式","較少專注在人身上，而對抽象想法與概念比較有興趣","在行動前謹慎地分析、評估每一個步驟，並考慮其後果","被視為有邏輯的、有條不紊的、可靠的、謹慎的人。"] },
+        "Balancing": { name: "均衡型 (Balancing)", desc: "權衡行動/反思以及經驗/思考的利弊來調整。", strong: "在學習循環圈移動的彈性、和相異特質人們共事的能力、創意性的洞察力。", challenge: "猶豫不決、什麼都會但不專精、持續的承諾。", traits: ["轉換學習方式從感覺到思考以及從反思到行動，依據情況改變學習方式","在團隊中調整成或補足缺少的風格，以便讓任務完成或是更有效地學習","被視為好奇的、開放的、彈性的、多重天賦的、足智多謀的人","因著調適能力能夠與不同教學方法的老師學習。"] }
+    };
+
+    // 初始化動態渲染問卷HTML
+    const container = document.getElementById("questions-container");
+    questionsData.forEach((q) => {
+        let html = `
+            <div class="quiz-item" id="q-box-${q.id}">
+                <div class="quiz-question">${q.text}</div>
+                <table class="options-table">
+                    <thead>
+                        <tr>
+                            <th>描述內容</th>
+                            <th>4 (最像我)</th>
+                            <th>3 (次像我)</th>
+                            <th>2 (次不像我)</th>
+                            <th>1 (最不像我)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        q.options.forEach((opt, idx) => {
+            html += `
+                <tr>
+                    <td class="option-text">${opt.t}</td>
+                    <td><input type="radio" name="q-${q.id}-opt-${idx}" value="4" data-key="${opt.k}" onclick="validateRow(${q.id})"></td>
+                    <td><input type="radio" name="q-${q.id}-opt-${idx}" value="3" data-key="${opt.k}" onclick="validateRow(${q.id})"></td>
+                    <td><input type="radio" name="q-${q.id}-opt-${idx}" value="2" data-key="${opt.k}" onclick="validateRow(${q.id})"></td>
+                    <td><input type="radio" name="q-${q.id}-opt-${idx}" value="1" data-key="${opt.k}" onclick="validateRow(${q.id})"></td>
+                </tr>
+            `;
+        });
+        html += `
+                    </tbody>
+                </table>
+                <div class="error-msg" id="error-${q.id}">⚠️ 請注意：本題分數（1,2,3,4）重複填選，或未填寫完整！每一列必須給予不同的權重值。</div>
+            </div>
+        `;
+        container.insertAdjacentHTML("beforeend", html);
+    });
+
+    // 即時檢查單題是否符合重複防呆
+    function validateRow(qId) {
+        const errorDiv = document.getElementById(`error-${qId}`);
+        const selectedValues = [];
+        let filledCount = 0;
+        
+        for (let idx = 0; idx < 4; idx++) {
+            const radios = document.getElementsByName(`q-${qId}-opt-${idx}`);
+            for (let r of radios) {
+                if (r.checked) {
+                    selectedValues.push(r.value);
+                    filledCount++;
+                }
+            }
+        }
+        
+        const hasDuplicates = new Set(selectedValues).size !== selectedValues.length;
+        if (hasDuplicates || (filledCount === 4 && selectedValues.length !== 4)) {
+            errorDiv.style.display = "block";
+            return false;
+        } else {
+            errorDiv.style.display = "none";
+            return true;
+        }
+    }
+
+    let radarChartInstance = null;
+    let gridChartInstance = null;
+
+    // 計算邏輯與分析生成
+    function calculateResult() {
+        let allValid = true;
+        let scores = { CE: 0, RO: 0, AC: 0, AE: 0 };
+
+        // 1. 驗證所有題目填寫狀況與防呆
+        for (let q of questionsData) {
+            let rowVals = [];
+            for (let idx = 0; idx < 4; idx++) {
+                const radios = document.getElementsByName(`q-${q.id}-opt-${idx}`);
+                let checkedObj = Array.from(radios).find(r => r.checked);
+                if (checkedObj) {
+                    rowVals.push(checkedObj.value);
+                    // 同步累加相應面向的分數
+                    scores[checkedObj.dataset.key] += parseInt(checkedObj.value);
+                }
+            }
+            
+            const isRowValid = rowVals.length === 4 && (new Set(rowVals).size === 4);
+            const errorDiv = document.getElementById(`error-${q.id}`);
+            if (!isRowValid) {
+                errorDiv.style.display = "block";
+                allValid = false;
+            } else {
+                errorDiv.style.display = "none";
+            }
+        }
+
+        if (!allValid) {
+            alert("填寫有誤！請確認每題皆已完整填寫，且 1、2、3、4 分數不可重複選擇。");
+            return;
+        }
+
+        // 2. 計算交叉座標軸
+        let coordX = scores.AC - scores.CE; // 橫軸 (AC - CE)
+        let coordY = scores.AE - scores.RO; // 縱軸 (AE - RO)
+
+        // 3. 顯示分數於網頁
+        document.getElementById("score-CE").innerText = scores.CE;
+        document.getElementById("score-RO").innerText = scores.RO;
+        document.getElementById("score-AC").innerText = scores.AC;
+        document.getElementById("score-AE").innerText = scores.AE;
+        document.getElementById("coord-X").innerText = coordX;
+        document.getElementById("coord-Y").innerText = coordY;
+
+        // 4. 九宮格落點與判別（完全遵循033-邱旅揚設計：焦點在(6,7)，向左向上為正方向擴展延伸反切）
+        let finalStyle = "Balancing"; // 預設中心平衡
+
+        // X與Y相對於分割臨界線的落點判讀切分（結合邱旅揚與九宮格分佈圖）
+        if (coordX > 11) { // 偏向左（即 AC 小，CE 大 面向）
+            if (coordY > 11) finalStyle = "Initiating";
+            else if (coordY >= 2 && coordY <= 11) finalStyle = "Experiencing";
+            else if (coordY < 2) finalStyle = "Imagining";
+        } 
+        else if (coordX >= 2 && coordX <= 11) { // 中間橫軸帶
+            if (coordY > 11) finalStyle = "Acting";
+            else if (coordY >= 2 && coordY <= 11) finalStyle = "Balancing";
+            else if (coordY < 2) finalStyle = "Reflecting";
+        } 
+        else if (coordX < 2) { // 偏向右（即 AC 大，CE 小 面向）
+            if (coordY > 11) finalStyle = "Deciding";
+            else if (coordY >= 2 && coordY <= 11) finalStyle = "Thinking";
+            else if (coordY < 2) finalStyle = "Analyzing";
+        }
+
+        // 5. 輸出特質分析文本
+        const styleInfo = styleTraits[finalStyle];
+        let traitsHtml = ``;
+        styleInfo.traits.forEach(t => traitsHtml += `<li>${t}</li>`);
+
+        document.getElementById("analysis-box").innerHTML = `
+            <h3 class="analysis-title">🎯 您的專屬學習風格鑑定：<strong>${styleInfo.name}</strong></h3>
+            <div class="style-details">
+                <p><strong>風格核心特徵：</strong>${styleInfo.desc}</p>
+                <h4>🌟 您的核心強項：</h4>
+                <p>${styleInfo.strong}</p>
+                <h4>⚠️ 面臨的潛在挑戰：</h4>
+                <p>${styleInfo.challenge}</p>
+                <h4>📋 具體行為特質展現：</h4>
+                <ul>${traitsHtml}</ul>
+            </div>
+        `;
+
+        document.getElementById("result-section").style.display = "block";
+        
+        // 滾動到結果區域
+        document.getElementById("result-section").scrollIntoView({ behavior: 'smooth' });
+
+        // 6. 渲染圖表
+        renderRadarChart(scores);
+        renderGridChart(coordX, coordY);
+    }
+
+    // 繪製四象限雷達圖
+    function renderRadarChart(scores) {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        if (radarChartInstance) radarChartInstance.destroy();
+
+        radarChartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['CE (具體經驗)', 'RO (反思觀察)', 'AC (抽象概念)', 'AE (主動體驗)'],
+                datasets: [{
+                    label: '得分分佈',
+                    data: [scores.CE, scores.RO, scores.AC, scores.AE],
+                    backgroundColor: 'rgba(43, 88, 118, 0.2)',
+                    borderColor: 'rgba(43, 88, 118, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(255, 107, 107, 1)'
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 48,
+                        ticks: { stepSize: 10 }
+                    }
+                }
+            }
+        });
+    }
+
+    // 繪製特製九宮格圖（橫軸向左為正、縱軸向下為正，焦點在(6,7)）
+    function renderGridChart(coordX, coordY) {
+        const ctx = document.getElementById('gridChart').getContext('2d');
+        if (gridChartInstance) gridChartInstance.destroy();
+
+        // 依據邱旅揚原圖座標軸定義：
+        // 橫軸原交叉點標示為 6，向左為正（變大）、向右為負（變小）
+        // 縱軸原交叉點標示為 7，向下為正（變大）、向上為負（變小）
+        // 為配合常規 HTML Canvas 渲染，我們在繪圖層將座標進行鏡像和偏差轉換。
+
+        gridChartInstance = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '您的位置',
+                    data: [{ x: coordX, y: coordY }],
+                    backgroundColor: 'red',
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    zIndex: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'center',
+                        min: -25, 
+                        max: 35,
+                        reverse: true, // 關鍵：橫軸正向向左（向左數值變大 AC-CE小）
+                        title: { display: true, text: '← AC - CE (橫座標軸)' },
+                        ticks: { stepSize: 10 }
+                    },
+                    y: {
+                        type: 'linear',
+                        position: 'center',
+                        min: -25,
+                        max: 35,
+                        reverse: true, // 關鍵：縱軸正向向下（向下數值變大 AE-RO小）
+                        title: { display: true, text: '↑ AE - RO (縱座標軸)' },
+                        ticks: { stepSize: 10 }
+                    }
+                },
+                plugins: {
+                    // 利用 Chart.js 插件機制在背景繪製九宮格區塊輔助線與文字標註
+                    beforeDraw: (chart) => {
+                        const { ctx, scales: { x, y } } = chart;
+                        const xLines = [x.getPixelForValue(11), x.getPixelForValue(2)];
+                        const yLines = [y.getPixelForValue(11), y.getPixelForValue(2)];
+                        
+                        ctx.save();
+                        
+                        // 繪製九宮格灰色虛線
+                        ctx.strokeStyle = '#cccccc';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([5, 5]);
+                        
+                        xLines.forEach(lineX => {
+                            ctx.beginPath();
+                            ctx.moveTo(lineX, y.top);
+                            ctx.lineTo(lineX, y.bottom);
+                            ctx.stroke();
+                        });
+                        
+                        yLines.forEach(lineY => {
+                            ctx.beginPath();
+                            ctx.moveTo(x.left, lineY);
+                            ctx.lineTo(x.right, lineY);
+                            ctx.stroke();
+                        });
+
+                        // 注入九個區域的背景名稱文字
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                        ctx.font = 'bold 12px sans-serif';
+                        ctx.textAlign = 'center';
+
+                        // 依據轉換後的反向象限位置標記文本
+                        // 左上 (Initiating) -> X大, Y大
+                        ctx.fillText('啟動型 Initiating', x.getPixelForValue(23), y.getPixelForValue(23));
+                        // 中上 (Acting) -> X中, Y大
+                        ctx.fillText('行動型 Acting', x.getPixelForValue(6.5), y.getPixelForValue(23));
+                        // 右上 (Deciding) -> X小, Y大
+                        ctx.fillText('決定型 Deciding', x.getPixelForValue(-10), y.getPixelForValue(23));
+
+                        // 左中 (Experiencing)
+                        ctx.fillText('經驗型 Experiencing', x.getPixelForValue(23), y.getPixelForValue(6.5));
+                        // 正中 (Balancing)
+                        ctx.fillText('均衡型 Balancing', x.getPixelForValue(6.5), y.getPixelForValue(6.5));
+                        // 右中 (Thinking)
+                        ctx.fillText('思考型 Thinking', x.getPixelForValue(-10), y.getPixelForValue(6.5));
+
+                        // 左下 (Imagining)
+                        ctx.fillText('想像型 Imagining', x.getPixelForValue(23), y.getPixelForValue(-10));
+                        // 中下 (Reflecting)
+                        ctx.fillText('反思型 Reflecting', x.getPixelForValue(6.5), y.getPixelForValue(-10));
+                        // 右下 (Analyzing)
+                        ctx.fillText('分析型 Analyzing', x.getPixelForValue(-10), y.getPixelForValue(-10));
+
+                        ctx.restore();
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
