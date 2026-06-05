@@ -3,252 +3,713 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kolb's Learning Style 學習風格分析風格分析</title>
+    <title>Kolb's Learning Style 學習風格分析問卷</title>
+    <!-- 引入 Chart.js 用於繪製精美雷達圖與九宮格 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入 html2pdf.js 用於客戶端生成 PDF 報告 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         :root {
             --primary-color: #2b5876;
-            --secondary-color: #4e4376;
+            --primary-light: #4e4376;
             --accent-color: #ff6b6b;
-            --bg-color: #f7f9fa;
-            --text-color: #333;
+            --success-color: #10b981;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --border-color: #e5e7eb;
         }
 
-        body {
-            font-family: "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
+        /* 基礎樣式重設 */
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .instructions {
-            background-color: #eef2f5;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            font-size: 0.95rem;
-            border-left: 5px solid var(--primary-color);
-        }
-
-        .instructions ul {
-            margin: 5px 0 0 20px;
             padding: 0;
         }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans TC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px 10px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 標題與視覺裝飾 */
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+
+        /* 基本資訊區塊 */
+        .user-info-section {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        }
+
+        .user-info-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .input-group label span {
+            color: var(--accent-color);
+        }
+
+        .input-group input {
+            padding: 10px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(43, 88, 118, 0.15);
+        }
+
+        /* 填寫說明 */
+        .instructions {
+            background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+            border-left: 6px solid var(--primary-color);
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+        }
+
+        .instructions strong {
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .instructions ul {
+            margin: 10px 0 0 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 6px;
+            color: var(--text-muted);
+        }
+
+        .highlight-badge {
+            background-color: #fee2e2;
+            color: #ef4444;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* 問卷題型 */
         .quiz-item {
-            margin-bottom: 35px;
-            border-bottom: 1px solid #eaeaea;
-            padding-bottom: 25px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 35px;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-item:hover {
+            border-bottom-color: #cbd5e1;
         }
 
         .quiz-question {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: var(--secondary-color);
-            margin-bottom: 15px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--primary-light);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* RWD 響應式表格 */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
 
         .options-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            min-width: 600px;
         }
 
         .options-table th, .options-table td {
-            padding: 10px;
+            padding: 14px;
             text-align: center;
-            border: 1px solid #e0e0e0;
+            border: 1px solid var(--border-color);
         }
 
         .options-table th {
-            background-color: #f8f9fa;
-            font-size: 0.9rem;
+            background-color: #f8fafc;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .options-table td.option-text {
             text-align: left;
-            width: 40%;
+            width: 45%;
             font-size: 0.95rem;
+            font-weight: 500;
+            color: #374151;
+            background-color: #fdfdfd;
         }
 
+        /* 自訂單選按鈕樣式，增加觸控面積與視覺回饋 */
+        .radio-container {
+            display: block;
+            position: relative;
+            cursor: pointer;
+            user-select: none;
+            height: 100%;
+            width: 100%;
+        }
+
+        .radio-container input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .checkmark {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #f3f4f6;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .radio-container:hover input ~ .checkmark {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+
+        .radio-container input:checked ~ .checkmark {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .radio-container input:checked ~ .checkmark:after {
+            display: block;
+        }
+
+        /* 錯誤警示訊息 */
         .error-msg {
             color: var(--accent-color);
             font-size: 0.85rem;
-            margin-top: 5px;
+            margin-top: 10px;
             display: none;
             text-align: left;
             font-weight: bold;
+            padding: 8px 12px;
+            background-color: #fef2f2;
+            border-radius: 6px;
+            border-left: 4px solid var(--accent-color);
         }
 
+        /* 按鈕設計 */
         .btn-submit {
             display: block;
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1.2rem;
+            border-radius: 10px;
+            font-size: 1.15rem;
             cursor: pointer;
-            transition: opacity 0.2s;
-            font-weight: bold;
-            margin-top: 20px;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
 
         .btn-submit:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            opacity: 0.95;
         }
 
+        .btn-submit:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* 下載 PDF 專用按鈕 */
+        .btn-pdf {
+            background: linear-gradient(135deg, #ea580c, #c2410c);
+            margin-top: 15px;
+        }
+
+        /* 上傳與儲存狀態提示 */
+        .status-banner {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        /* 結果展示區域 */
         #result-section {
             display: none;
-            margin-top: 40px;
-            border-top: 3px double var(--primary-color);
-            padding-top: 30px;
+            margin-top: 50px;
+            border-top: 2px dashed var(--primary-color);
+            padding-top: 40px;
         }
 
-        .charts-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .chart-box {
-            flex: 1;
-            min-width: 350px;
-            max-width: 420px;
-            background: #fff;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-        }
-
-        .chart-box h3 {
+        .section-title {
             text-align: center;
-            margin-top: 0;
-            color: #444;
+            color: var(--primary-color);
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 25px;
         }
 
         .scores-display {
             display: flex;
             justify-content: space-around;
-            background: #f1f3f5;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
         }
 
         .score-tag {
             text-align: center;
+            flex: 1;
+        }
+
+        .score-tag:not(:last-child) {
+            border-right: 1px solid var(--border-color);
+        }
+
+        .score-tag label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
         .score-tag span {
             display: block;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 800;
             color: var(--primary-color);
         }
 
-        .analysis-box {
-            background-color: #fffdf5;
-            border: 1px solid #ffeeba;
-            padding: 25px;
-            border-radius: 8px;
+        /* 圖表配置 */
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            justify-content: center;
             margin-top: 30px;
+        }
+
+        .chart-box {
+            flex: 1;
+            min-width: 320px;
+            max-width: 440px;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-box h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--primary-light);
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            height: 320px;
+        }
+
+        /* 分析特質區塊 */
+        .analysis-box {
+            background-color: #fffbeb;
+            border: 1px solid #fef3c7;
+            padding: 30px;
+            border-radius: 14px;
+            margin-top: 35px;
+            box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.05);
+        }
+
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #fde68a;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .analysis-title {
             font-size: 1.4rem;
-            color: #856404;
-            margin-top: 0;
-            border-bottom: 2px solid #ffeeba;
-            padding-bottom: 10px;
+            color: #92400e;
+            font-weight: 800;
+        }
+
+        .style-details p {
+            color: #374151;
+            margin-bottom: 15px;
+            font-size: 1rem;
         }
 
         .style-details h4 {
-            margin: 15px 0 5px 0;
-            color: var(--secondary-color);
+            margin: 20px 0 8px 0;
+            color: var(--primary-light);
+            font-size: 1.05rem;
+            font-weight: 700;
         }
         
         .style-details ul {
-            margin: 5px 0;
+            margin: 10px 0;
             padding-left: 20px;
+        }
+
+        .style-details li {
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* 自訂美觀的 Modal 替代原生 alert */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 480px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .modal-message {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: var(--primary-light);
+        }
+
+        /* PDF 列印特定微調，確保圖片不截斷，排版工整 */
+        .pdf-only-header {
+            display: none;
+            text-align: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .pdf-only-header h2 {
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .pdf-user-info {
+            display: flex;
+            justify-content: space-around;
+            font-size: 1rem;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        /* 手機板適應優化 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 24px 15px;
+            }
+            .user-info-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .scores-display {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .score-tag:not(:last-child) {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 15px;
+            }
+            .btn-submit {
+                font-size: 1rem;
+                padding: 14px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Kolb's Learning Style 學習風格問卷</h1>
+<div class="container" id="main-content-area">
+    <h1>Kolb's 學習風格問卷</h1>
+    <div class="subtitle">Kolb's Learning Style Inventory</div>
     
+    <!-- 個人基本資訊輸入區 -->
+    <div class="user-info-section">
+        <div class="user-info-title">👤 受測人員基本資料</div>
+        <div class="user-info-grid">
+            <div class="input-group">
+                <label for="user-unit">單位 <span>*</span></label>
+                <input type="text" id="user-unit" placeholder="請輸入您的部門/單位" required>
+            </div>
+            <div class="input-group">
+                <label for="user-name">姓名 <span>*</span></label>
+                <input type="text" id="user-name" placeholder="請輸入您的真實姓名" required>
+            </div>
+            <div class="input-group">
+                <label for="user-id">人事號 <span>*</span></label>
+                <input type="text" id="user-id" placeholder="請輸入您的人事工號" required>
+            </div>
+        </div>
+    </div>
+
+    <!-- 說明與問卷表單 -->
     <div class="instructions">
         <strong>填寫說明：</strong><br>
-        請假設您<strong>「在學習全新知識、全新事物等情況時」</strong>（避免只聚焦一個明確對象）的角度，來考量以下12個問題。 
+        請假設您<strong>「在學習全新知識、全新事物等情況時」</strong>的角度，來考量以下 12 個問題。 
         <ul>
-            <li>每一題包含四個選項，請對這四個描述進行自我分析排序。 </li>
-            <li>請填選：<strong>4 = 最像我</strong>、<strong>3 = 次像我</strong>、<strong>2 = 次不像我</strong>、<strong>1 = 最不像我</strong>。 </li>
-            <li><strong>注意：</strong>每一題的四個選項得分<strong>不可重複</strong>（即每題皆須包含 1, 2, 3, 4 四個相異數字）。 [cite: 2, 67]</li>
+            <li>每一題包含四個選項，請對這四個描述進行自我分析排序。</li>
+            <li>請填選：<strong>4 (最像我)</strong>、<strong>3 (次像我)</strong>、<strong>2 (次不像我)</strong>、<strong>1 (最不像我)</strong>。</li>
+            <li><span class="highlight-badge">注意</span> 每一題的四個選項得分<strong>不可重複</strong>（即每題皆須包含 1, 2, 3, 4 四個相異數字）。</li>
         </ul>
     </div>
 
     <form id="quiz-form">
         <div id="questions-container"></div>
-        <button type="button" class="btn-submit" onclick="calculateResult()">送出問卷，生成個人學習風格分析</button>
+        <button type="button" class="btn-submit" id="btn-submit-form" onclick="calculateResult()">送出問卷並生成風格分析</button>
+        <div id="upload-status-banner" class="status-banner"></div>
     </form>
 
     <div id="result-section">
-        <h2>📊 您的個人學習風格分析結果</h2>
-        
-        <div class="scores-display">
-            <div class="score-tag">CE (具體經驗) <span id="score-CE">-</span></div>
-            <div class="score-tag">RO (反思觀察) <span id="score-RO">-</span></div>
-            <div class="score-tag">AC (抽象概念) <span id="score-AC">-</span></div>
-            <div class="score-tag">AE (主動體驗) <span id="score-AE">-</span></div>
+        <!-- PDF 列印專用表頭 (平時隱藏，產出 PDF 時會動態顯示) -->
+        <div class="pdf-only-header" id="pdf-header">
+            <h2>Kolb 學習風格個人分析診斷報告</h2>
+            <div class="pdf-user-info">
+                <span>單位：<span id="pdf-info-unit"></span></span>
+                <span>姓名：<span id="pdf-info-name"></span></span>
+                <span>人事號：<span id="pdf-info-id"></span></span>
+                <span>檢測時間：<span id="pdf-info-date"></span></span>
+            </div>
         </div>
 
-        <div class="scores-display" style="background-color: #e8f4fd;">
-            <div class="score-tag">橫座標 (AC - CE) <span id="coord-X">-</span></div>
-            <div class="score-tag">縱座標 (AE - RO) <span id="coord-Y">-</span></div>
+        <h2 class="section-title" id="web-result-title">📊 您的個人學習風格分析結果</h2>
+        
+        <div class="scores-display">
+            <div class="score-tag">
+                <label>CE (具體經驗)</label>
+                <span id="score-CE">-</span>
+            </div>
+            <div class="score-tag">
+                <label>RO (反思觀察)</label>
+                <span id="score-RO">-</span>
+            </div>
+            <div class="score-tag">
+                <label>AC (抽象概念)</label>
+                <span id="score-AC">-</span>
+            </div>
+            <div class="score-tag">
+                <label>AE (主動體驗)</label>
+                <span id="score-AE">-</span>
+            </div>
+        </div>
+
+        <div class="scores-display" style="background-color: #f0f7ff; border-color: #bfdbfe;">
+            <div class="score-tag">
+                <label style="color: #1e40af;">橫座標 (AC - CE)</label>
+                <span id="coord-X" style="color: #1e40af;">-</span>
+            </div>
+            <div class="score-tag">
+                <label style="color: #1e40af;">縱座標 (AE - RO)</label>
+                <span id="coord-Y" style="color: #1e40af;">-</span>
+            </div>
         </div>
 
         <div class="charts-container">
             <div class="chart-box">
                 <h3>Kolb 四面向雷達圖</h3>
-                <canvas id="radarChart"></canvas>
+                <div class="chart-wrapper">
+                    <canvas id="radarChart"></canvas>
+                </div>
             </div>
             <div class="chart-box">
                 <h3>學習風格九宮格定位</h3>
-                <canvas id="gridChart"></canvas>
+                <div class="chart-wrapper">
+                    <canvas id="gridChart"></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="analysis-box" id="analysis-box">
-            </div>
+        <div class="analysis-box" id="analysis-box"></div>
+        
+        <!-- 手機或漏下載時的備用手動下載按鈕 -->
+        <button type="button" class="btn-submit btn-pdf" id="btn-download-pdf" onclick="generatePDF(true)">📥 手動下載 PDF 分析報告</button>
+    </div>
+</div>
+
+<!-- 自訂對話框 (Modal Overlay) -->
+<div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+        <div class="modal-icon" id="modal-icon">⚠️</div>
+        <div class="modal-title" id="modal-title">標題</div>
+        <div class="modal-message" id="modal-message">內容訊息</div>
+        <button class="modal-btn" onclick="closeModal()">確認</button>
     </div>
 </div>
 
 <script>
-    // 12題題目數據定義
+    // 12 題題目數據定義
     const questionsData = [
         { id: 1, text: "01. 當我學習時，When I learn", options: [ { k: "CE", t: "我喜歡加入自己的感受 I like to deal with my feelings" }, { k: "RO", t: "我喜歡觀察與聆聽 I like to watch and listen" }, { k: "AC", t: "我喜歡思考觀念 I like to think about ideas" }, { k: "AE", t: "我喜歡實際操作 I like to be doing things" } ] },
         { id: 2, text: "02. 我學的最好的時候，是當……I learn best when", options: [ { k: "AE", t: "我努力完成實作 I work hard to get things done" }, { k: "CE", t: "我相信我的直覺與感受 I trust my hunches and feelings" }, { k: "RO", t: "我仔細聆聽與觀察 I listen and watch carefully" }, { k: "AC", t: "我依賴邏輯思考 I rely on logical thinking" } ] },
@@ -264,10 +725,10 @@
         { id: 12, text: "12. 我學的最好的時候，是當……I learn best when", options: [ { k: "RO", t: "我非常小心時 I am careful" }, { k: "AC", t: "我分析想法時 I analyze ideas" }, { k: "AE", t: "我實際動手做時 I am practical" }, { k: "CE", t: "我接受他人的看法、開放心胸時 I am receptive and open-minded" } ] }
     ];
 
-    // 九型人格特質文本數據
+    // 九宮格學習特質資料
     const styleTraits = {
         "Imagining": { name: "想像型 (Imagining)", desc: "依據觀察和反思經驗來想像可能性。", strong: "察覺人的感受和價值觀、放開心傾聽、善於想像並能處理兩可的情境。", challenge: "做決定、擔任領導統御。", traits: ["透過觀察與反思過去經驗和感受進行學習","具有多元觀點視野的能力","是個好的傾聽者，能辨認出事件、人際關係和團體互動的不同類型並瞭解其意義","被視為關懷人的、接納的、創造的、敏感性的及心胸開闊的人。"] },
-        "Initiating": { name: "啟動型 (Initiating)", desc: "啟動處理經驗和情況的行動。", strong: "將自己投入目標、尋找新的機會、影響並領導其他人。", challenge: "控制衝動行動、傾聽他人的觀點、培養耐心。", traits: ["偏好藉由動手操作或實際生活體驗進行學習","在變動環境下不會陷入過多考慮，具備迅速與決斷行動的能力","比起邏輯分析更傾向以直覺行動；比起自己的技術分析，更依賴他人的經驗資訊","被視為具有自發性、有活力、具備說服力並有勇氣膽量的人。"] },
+        "Initiating": { name: "啟動型 (Initiating)", desc: "啟動處理經驗和情況的行動。", strong: "將自己投入目標、尋找新的機會、影響並領導其他人。", challenge: "控制衝動行動、傾聽他人的觀點、培養 Patience (耐心)。", traits: ["偏好藉由動手操作或實際生活體驗進行學習","在變動環境下不會陷入過多考慮，具備迅速與決斷行動的能力","比起邏輯分析更傾向以直覺行動；比起自己的技術分析，更依賴他人的經驗資訊","被視為具有自發性、有活力、具備說服力並有勇氣膽量的人。"] },
         "Experiencing": { name: "經驗型 (Experiencing)", desc: "從經驗中深度參與發現意義。", strong: "建立個人學習網絡、在反思與行動上都具有敏銳直覺、容易接受新的經驗。", challenge: "理解理論、系統性的規劃、批判性的判斷。", traits: ["從深入參與的人生經驗和情境中學習","仰賴對他人或某個情境所得到的感受與回應來學習","對他人的感受有強烈的敏銳度，並特別擅長由此建立有意義的網絡關係","解決問題時往往採取創新非傳統的方式。"] },
         "Reflecting": { name: "反思型 (Reflecting)", desc: "藉由持續的反思連結經驗與想法的能力。", strong: "反思、觀察(RO)觀點、蒐集資訊、能了解他人發生甚麼狀況、將直覺轉換為明確解釋。", challenge: "採取行動、反芻/沉思、在團體中發聲。", traits: ["使用觀察以及反思作為主要的學習基礎","擁有敏銳的觀察力，能夠了解與辨識事件事實、人際互動中更深層的意義","在別人眼中是安靜、富洞察力、仔細、敏感以及有深度的人","需要時間獨自反思並且理解自己經驗的意義。"] },
         "Acting": { name: "行動型 (Acting)", desc: "對於目標導向的整合與行動有強烈動機。", strong: "結合技術型知識與人際關係、專注於將事情完成。", challenge: "引導工作小組、花些時間反思、解決對的問題、搜集與分析訊息。", traits: ["目標導向並且專注於將事情完成","擅長將計畫實現、或是根據當下的情況結合自己相關的經驗與抽象概念，測試並找出能夠解決問題的方法","比起反思更喜歡直接行動，有時會在尚未考慮後果以及其他選項的情況下作承諾","被視為精力充沛的、謀略的、負責的人。"] },
@@ -277,45 +738,69 @@
         "Balancing": { name: "均衡型 (Balancing)", desc: "權衡行動/反思以及經驗/思考的利弊來調整。", strong: "在學習循環圈移動的彈性、和相異特質人們共事的能力、創意性的洞察力。", challenge: "猶豫不決、什麼都會但不專精、持續的承諾。", traits: ["轉換學習方式從感覺到思考以及從反思到行動，依據情況改變學習方式","在團隊中調整成或補足缺少的風格，以便讓任務完成或是更有效地學習","被視為好奇的、開放的、彈性的、多重天賦的、足智多謀的人","因著調適能力能夠與不同教學方法的老師學習。"] }
     };
 
-    // 初始化動態渲染問卷HTML
+    // 渲染問卷 HTML
     const container = document.getElementById("questions-container");
     questionsData.forEach((q) => {
         let html = `
             <div class="quiz-item" id="q-box-${q.id}">
-                <div class="quiz-question">${q.text}</div>
-                <table class="options-table">
-                    <thead>
-                        <tr>
-                            <th>描述內容</th>
-                            <th>4 (最像我)</th>
-                            <th>3 (次像我)</th>
-                            <th>2 (次不像我)</th>
-                            <th>1 (最不像我)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="quiz-question">
+                    <span>📝</span> ${q.text}
+                </div>
+                <div class="table-responsive">
+                    <table class="options-table">
+                        <thead>
+                            <tr>
+                                <th>描述內容 Description</th>
+                                <th>4 (最像我)</th>
+                                <th>3 (次像我)</th>
+                                <th>2 (次不像我)</th>
+                                <th>1 (最不像我)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
         `;
         q.options.forEach((opt, idx) => {
             html += `
                 <tr>
                     <td class="option-text">${opt.t}</td>
-                    <td><input type="radio" name="q-${q.id}-opt-${idx}" value="4" data-key="${opt.k}" onclick="validateRow(${q.id})"></td>
-                    <td><input type="radio" name="q-${q.id}-opt-${idx}" value="3" data-key="${opt.k}" onclick="validateRow(${q.id})"></td>
-                    <td><input type="radio" name="q-${q.id}-opt-${idx}" value="2" data-key="${opt.k}" onclick="validateRow(${q.id})"></td>
-                    <td><input type="radio" name="q-${q.id}-opt-${idx}" value="1" data-key="${opt.k}" onclick="validateRow(${q.id})"></td>
+                    <td>
+                        <label class="radio-container">
+                            <input type="radio" name="q-${q.id}-opt-${idx}" value="4" data-key="${opt.k}" onclick="validateRow(${q.id})">
+                            <span class="checkmark"></span>
+                        </label>
+                    </td>
+                    <td>
+                        <label class="radio-container">
+                            <input type="radio" name="q-${q.id}-opt-${idx}" value="3" data-key="${opt.k}" onclick="validateRow(${q.id})">
+                            <span class="checkmark"></span>
+                        </label>
+                    </td>
+                    <td>
+                        <label class="radio-container">
+                            <input type="radio" name="q-${q.id}-opt-${idx}" value="2" data-key="${opt.k}" onclick="validateRow(${q.id})">
+                            <span class="checkmark"></span>
+                        </label>
+                    </td>
+                    <td>
+                        <label class="radio-container">
+                            <input type="radio" name="q-${q.id}-opt-${idx}" value="1" data-key="${opt.k}" onclick="validateRow(${q.id})">
+                            <span class="checkmark"></span>
+                        </label>
+                    </td>
                 </tr>
             `;
         });
         html += `
-                    </tbody>
-                </table>
-                <div class="error-msg" id="error-${q.id}">⚠️ 請注意：本題分數（1,2,3,4）重複填選，或未填寫完整！每一列必須給予不同的權重值。</div>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="error-msg" id="error-${q.id}">⚠️ 請注意：本題分數（1, 2, 3, 4）有重複填選，或有選項未填！每一列描述都必須分配不重複的權重。</div>
             </div>
         `;
         container.insertAdjacentHTML("beforeend", html);
     });
 
-    // 即時檢查單題是否符合重複防呆
+    // 動態警示防呆機制
     function validateRow(qId) {
         const errorDiv = document.getElementById(`error-${qId}`);
         const selectedValues = [];
@@ -331,6 +816,7 @@
             }
         }
         
+        // 檢查是否有選到重複的分數
         const hasDuplicates = new Set(selectedValues).size !== selectedValues.length;
         if (hasDuplicates || (filledCount === 4 && selectedValues.length !== 4)) {
             errorDiv.style.display = "block";
@@ -341,24 +827,52 @@
         }
     }
 
+    // Modal 控制
+    function showModal(title, msg, icon = "⚠️") {
+        document.getElementById("modal-title").innerText = title;
+        document.getElementById("modal-message").innerText = msg;
+        document.getElementById("modal-icon").innerText = icon;
+        document.getElementById("custom-modal").classList.add("active");
+    }
+
+    function closeModal() {
+        document.getElementById("custom-modal").classList.remove("active");
+    }
+
     let radarChartInstance = null;
     let gridChartInstance = null;
 
-    // 計算邏輯與分析生成
+    // 計算分數主邏輯
     function calculateResult() {
+        // 0. 驗證基本資訊是否確實填寫
+        const unit = document.getElementById("user-unit").value.trim();
+        const name = document.getElementById("user-name").value.trim();
+        const employeeId = document.getElementById("user-id").value.trim();
+
+        if (!unit || !name || !employeeId) {
+            showModal("基本資料未完整填寫", "請於問卷最上方輸入您的「單位」、「姓名」與「人事號」，這些資訊將會用於產出您的個人報告 PDF 檔案。", "👤");
+            return;
+        }
+
         let allValid = true;
         let scores = { CE: 0, RO: 0, AC: 0, AE: 0 };
+        let answers = []; // 用於收集 12 題詳細原始評分資料
 
-        // 1. 驗證所有題目填寫狀況與防呆
+        // 1. 驗證所有題目是否完整正確，並收集答案
         for (let q of questionsData) {
             let rowVals = [];
+            let qAnswers = {}; // 儲存單題各個屬性 (CE, RO, AC, AE) 分配的分數
+            
             for (let idx = 0; idx < 4; idx++) {
                 const radios = document.getElementsByName(`q-${q.id}-opt-${idx}`);
                 let checkedObj = Array.from(radios).find(r => r.checked);
                 if (checkedObj) {
+                    const scoreVal = parseInt(checkedObj.value);
                     rowVals.push(checkedObj.value);
-                    // 同步累加相應面向的分數
-                    scores[checkedObj.dataset.key] += parseInt(checkedObj.value);
+                    scores[checkedObj.dataset.key] += scoreVal;
+                    
+                    // 記錄該題每個維度拿到的分數
+                    qAnswers[checkedObj.dataset.key] = scoreVal;
                 }
             }
             
@@ -369,19 +883,27 @@
                 allValid = false;
             } else {
                 errorDiv.style.display = "none";
+                // 收集單題答案，例如：{ qId: 1, CE: 4, RO: 3, AC: 2, AE: 1 }
+                answers.push({
+                    questionId: q.id,
+                    CE: qAnswers.CE,
+                    RO: qAnswers.RO,
+                    AC: qAnswers.AC,
+                    AE: qAnswers.AE
+                });
             }
         }
 
         if (!allValid) {
-            alert("填寫有誤！請確認每題皆已完整填寫，且 1、2、3、4 分數不可重複選擇。");
+            showModal("填寫資料有誤", "請確認每道問題皆已完整填寫，且一題中的四個描述分配之「1、2、3、4」分數不可重複！", "❌");
             return;
         }
 
-        // 2. 計算交叉座標軸
+        // 2. 交叉坐標軸計算
         let coordX = scores.AC - scores.CE; // 橫軸 (AC - CE)
         let coordY = scores.AE - scores.RO; // 縱軸 (AE - RO)
 
-        // 3. 顯示分數於網頁
+        // 3. 填入畫面的數據指標
         document.getElementById("score-CE").innerText = scores.CE;
         document.getElementById("score-RO").innerText = scores.RO;
         document.getElementById("score-AC").innerText = scores.AC;
@@ -389,33 +911,35 @@
         document.getElementById("coord-X").innerText = coordX;
         document.getElementById("coord-Y").innerText = coordY;
 
-        // 4. 九宮格落點與判別（完全遵循033-邱旅揚設計：焦點在(6,7)，向左向上為正方向擴展延伸反切）
-        let finalStyle = "Balancing"; // 預設中心平衡
+        // 4. 九宮格落點判定
+        let finalStyle = "Balancing"; 
 
-        // X與Y相對於分割臨界線的落點判讀切分（結合邱旅揚與九宮格分佈圖）
-        if (coordX > 11) { // 偏向左（即 AC 小，CE 大 面向）
+        if (coordX > 11) { 
             if (coordY > 11) finalStyle = "Initiating";
             else if (coordY >= 2 && coordY <= 11) finalStyle = "Experiencing";
             else if (coordY < 2) finalStyle = "Imagining";
         } 
-        else if (coordX >= 2 && coordX <= 11) { // 中間橫軸帶
+        else if (coordX >= 2 && coordX <= 11) { 
             if (coordY > 11) finalStyle = "Acting";
             else if (coordY >= 2 && coordY <= 11) finalStyle = "Balancing";
             else if (coordY < 2) finalStyle = "Reflecting";
         } 
-        else if (coordX < 2) { // 偏向右（即 AC 大，CE 小 面向）
+        else if (coordX < 2) { 
             if (coordY > 11) finalStyle = "Deciding";
             else if (coordY >= 2 && coordY <= 11) finalStyle = "Thinking";
             else if (coordY < 2) finalStyle = "Analyzing";
         }
 
-        // 5. 輸出特質分析文本
+        // 5. 輸出性格描述 HTML
         const styleInfo = styleTraits[finalStyle];
         let traitsHtml = ``;
         styleInfo.traits.forEach(t => traitsHtml += `<li>${t}</li>`);
 
         document.getElementById("analysis-box").innerHTML = `
-            <h3 class="analysis-title">🎯 您的專屬學習風格鑑定：<strong>${styleInfo.name}</strong></h3>
+            <div class="analysis-header">
+                <span style="font-size: 1.8rem;">🎯</span>
+                <h3 class="analysis-title">您的專屬學習風格鑑定：<strong>${styleInfo.name}</strong></h3>
+            </div>
             <div class="style-details">
                 <p><strong>風格核心特徵：</strong>${styleInfo.desc}</p>
                 <h4>🌟 您的核心強項：</h4>
@@ -427,17 +951,146 @@
             </div>
         `;
 
+        // 6. 設定 PDF 報告專用的動態個人資料
+        document.getElementById("pdf-info-unit").innerText = unit;
+        document.getElementById("pdf-info-name").innerText = name;
+        document.getElementById("pdf-info-id").innerText = employeeId;
+        document.getElementById("pdf-info-date").innerText = new Date().toLocaleString();
+
         document.getElementById("result-section").style.display = "block";
-        
-        // 滾動到結果區域
         document.getElementById("result-section").scrollIntoView({ behavior: 'smooth' });
 
-        // 6. 渲染圖表
+        // 7. 圖表繪製 (需在 PDF 生成前繪製完畢)
         renderRadarChart(scores);
         renderGridChart(coordX, coordY);
+
+        // 8. 將符合 GAS 資料格式的結果，傳送至指定 Google Apps Script 雲端
+        sendDataToGoogleScript(unit, name, employeeId, scores, coordX, coordY, styleInfo.name, answers);
     }
 
-    // 繪製四象限雷達圖
+    // 發送問卷數據至指定 GAS API
+    function sendDataToGoogleScript(unit, name, employeeId, scores, coordX, coordY, styleName, answers) {
+        const gasUrl = "https://script.google.com/macros/s/AKfycbwYYuqgxnqNiFoWNi-WWuvR17zw26MMxIxB9mkosR5v6yC_tJWsmgc23GRc18ZSsuSv/exec";
+        const statusBanner = document.getElementById("upload-status-banner");
+        const submitBtn = document.getElementById("btn-submit-form");
+
+        statusBanner.style.display = "block";
+        statusBanner.innerText = "⏳ 正在將您的數據同步至雲端試算表...";
+        statusBanner.style.backgroundColor = "#eff6ff";
+        statusBanner.style.color = "#1d4ed8";
+        submitBtn.disabled = true;
+
+        const payload = {
+            unit: unit,
+            name: name,
+            employeeId: employeeId,
+            scores: {
+                CE: scores.CE,
+                RO: scores.RO,
+                AC: scores.AC,
+                AE: scores.AE
+            },
+            coordX: coordX,
+            coordY: coordY,
+            styleName: styleName,
+            answers: answers // 12 題詳細原始分數陣列
+        };
+
+        // 使用 fetch 送出 POST 請求
+        fetch(gasUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "text/plain" // 規避 CORS 預檢限制的標準做法
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.result === "success") {
+                statusBanner.innerText = "🎉 資料已成功傳輸至系統！";
+                statusBanner.style.backgroundColor = "#ecfdf5";
+                statusBanner.style.color = "#047857";
+                submitBtn.disabled = false;
+                
+                // 上傳完成後，顯示成功視窗，並啟動 PDF 報告生成下載
+                showModal("同步成功", "您的學習風格分析已成功記錄至試算表！系統正在為您自動產出 PDF 診斷報告，請注意瀏覽器的下載提示。", "✅");
+                
+                // 延遲 1.5 秒自動產出 PDF，確保圖表和 DOM 均已完美渲染並穩定
+                setTimeout(() => {
+                    generatePDF(false);
+                }, 1500);
+            } else {
+                throw new Error(data.message || "伺服器寫入失敗");
+            }
+        })
+        .catch(error => {
+            console.error("GAS Post Error: ", error);
+            // 降級處理：即使同步到 Sheets 失敗，仍讓使用者可以產出 PDF 帶走報告
+            statusBanner.innerText = "⚠️ 數據未能同步至雲端（但下方仍可產生與下載個人報告）";
+            statusBanner.style.backgroundColor = "#fffbeb";
+            statusBanner.style.color = "#b45309";
+            submitBtn.disabled = false;
+            
+            showModal("溫馨提示", "雖然同步至雲端庫時發生網絡延遲，但您的本地分析報告仍可正常產出！系統將為您自動生成並下載 PDF 診斷報告。", "⚠️");
+            
+            setTimeout(() => {
+                generatePDF(false);
+            }, 1500);
+        });
+    }
+
+    // PDF 自動生成下載主邏輯
+    function generatePDF(isManual = false) {
+        const name = document.getElementById("user-name").value.trim() || "受測者";
+        const pdfHeader = document.getElementById("pdf-header");
+        const webTitle = document.getElementById("web-result-title");
+        const downloadBtn = document.getElementById("btn-download-pdf");
+
+        // 1. 動態將 PDF header 設為顯示，網頁 Title 及手動下載按鈕暫時隱藏，避免列印在 PDF 中
+        pdfHeader.style.display = "block";
+        webTitle.style.display = "none";
+        downloadBtn.style.display = "none";
+
+        // 2. 獲取要輸出為 PDF 的區塊
+        const element = document.getElementById("result-section");
+
+        // 3. pdf 設定參數
+        const opt = {
+            margin:       10,
+            filename:     `Kolb學習風格報告_${name}_${new Date().toLocaleDateString()}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                letterRendering: true,
+                scrollX: 0,
+                scrollY: 0
+            },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        // 4. 呼叫 html2pdf 產出並下載
+        html2pdf().set(opt).from(element).save().then(() => {
+            // 5. 輸出完畢後，還原網頁外觀
+            pdfHeader.style.display = "none";
+            webTitle.style.display = "block";
+            downloadBtn.style.display = "block";
+            
+            if (isManual) {
+                showModal("下載成功", "您已成功下載專屬個人學習風格分析 PDF 報告！", "🎉");
+            }
+        }).catch(err => {
+            console.error("PDF generation failed: ", err);
+            // 異常還原機制
+            pdfHeader.style.display = "none";
+            webTitle.style.display = "block";
+            downloadBtn.style.display = "block";
+        });
+    }
+
+    // 繪製雷達圖
     function renderRadarChart(scores) {
         const ctx = document.getElementById('radarChart').getContext('2d');
         if (radarChartInstance) radarChartInstance.destroy();
@@ -447,72 +1100,111 @@
             data: {
                 labels: ['CE (具體經驗)', 'RO (反思觀察)', 'AC (抽象概念)', 'AE (主動體驗)'],
                 datasets: [{
-                    label: '得分分佈',
+                    label: '個人分數分布',
                     data: [scores.CE, scores.RO, scores.AC, scores.AE],
-                    backgroundColor: 'rgba(43, 88, 118, 0.2)',
+                    backgroundColor: 'rgba(43, 88, 118, 0.15)',
                     borderColor: 'rgba(43, 88, 118, 1)',
                     borderWidth: 2,
-                    pointBackgroundColor: 'rgba(255, 107, 107, 1)'
+                    pointBackgroundColor: 'rgba(255, 107, 107, 1)',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 1.5,
+                    pointRadius: 5
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     r: {
                         min: 0,
                         max: 48,
-                        ticks: { stepSize: 10 }
+                        ticks: { 
+                            stepSize: 12,
+                            backdropColor: 'transparent',
+                            color: '#9ca3af'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        angleLines: {
+                            color: 'rgba(0, 0, 0, 0.08)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
             }
         });
     }
 
-    // 繪製特製九宮格圖（橫軸向左為正、縱軸向下為正，焦點在(6,7)）
+    // 繪製九宮格定位
     function renderGridChart(coordX, coordY) {
         const ctx = document.getElementById('gridChart').getContext('2d');
         if (gridChartInstance) gridChartInstance.destroy();
-
-        // 依據邱旅揚原圖座標軸定義：
-        // 橫軸原交叉點標示為 6，向左為正（變大）、向右為負（變小）
-        // 縱軸原交叉點標示為 7，向下為正（變大）、向上為負（變小）
-        // 為配合常規 HTML Canvas 渲染，我們在繪圖層將座標進行鏡像和偏差轉換。
 
         gridChartInstance = new Chart(ctx, {
             type: 'scatter',
             data: {
                 datasets: [{
-                    label: '您的位置',
+                    label: '您落點的位置',
                     data: [{ x: coordX, y: coordY }],
-                    backgroundColor: 'red',
-                    pointRadius: 8,
-                    pointHoverRadius: 10,
-                    zIndex: 10
+                    backgroundColor: '#ef4444',
+                    pointRadius: 9,
+                    pointHoverRadius: 11,
+                    borderColor: '#ffffff',
+                    borderWidth: 2,
+                    zIndex: 20
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     x: {
                         type: 'linear',
                         position: 'center',
                         min: -25, 
                         max: 35,
-                        reverse: true, // 關鍵：橫軸正向向左（向左數值變大 AC-CE小）
-                        title: { display: true, text: '← AC - CE (橫座標軸)' },
-                        ticks: { stepSize: 10 }
+                        reverse: true, // 橫軸向左為正方向
+                        title: { 
+                            display: true, 
+                            text: '← AC - CE (橫軸)',
+                            font: { weight: 'bold', size: 10 }
+                        },
+                        ticks: { stepSize: 10 },
+                        grid: { color: 'rgba(0,0,0,0.03)' }
                     },
                     y: {
                         type: 'linear',
                         position: 'center',
                         min: -25,
                         max: 35,
-                        reverse: true, // 關鍵：縱軸正向向下（向下數值變大 AE-RO小）
-                        title: { display: true, text: '↑ AE - RO (縱座標軸)' },
-                        ticks: { stepSize: 10 }
+                        reverse: true, // 縱軸向下為正方向
+                        title: { 
+                            display: true, 
+                            text: '↑ AE - RO (縱軸)',
+                            font: { weight: 'bold', size: 10 }
+                        },
+                        ticks: { stepSize: 10 },
+                        grid: { color: 'rgba(0,0,0,0.03)' }
                     }
                 },
                 plugins: {
-                    // 利用 Chart.js 插件機制在背景繪製九宮格區塊輔助線與文字標註
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `座標位置: (X: ${context.parsed.x}, Y: ${context.parsed.y})`;
+                            }
+                        }
+                    }
+                },
+                // 背景自訂九宮格繪製
+                plugins: [{
+                    id: 'nineGridBackground',
                     beforeDraw: (chart) => {
                         const { ctx, scales: { x, y } } = chart;
                         const xLines = [x.getPixelForValue(11), x.getPixelForValue(2)];
@@ -520,10 +1212,10 @@
                         
                         ctx.save();
                         
-                        // 繪製九宮格灰色虛線
-                        ctx.strokeStyle = '#cccccc';
+                        // 畫背景網格分隔虛線
+                        ctx.strokeStyle = '#cbd5e1';
                         ctx.lineWidth = 1;
-                        ctx.setLineDash([5, 5]);
+                        ctx.setLineDash([4, 4]);
                         
                         xLines.forEach(lineX => {
                             ctx.beginPath();
@@ -539,36 +1231,29 @@
                             ctx.stroke();
                         });
 
-                        // 注入九個區域的背景名稱文字
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                        ctx.font = 'bold 12px sans-serif';
+                        // 填充區域風格文字
+                        ctx.fillStyle = 'rgba(75, 85, 99, 0.6)';
+                        ctx.font = 'bold 11px -apple-system, sans-serif';
                         ctx.textAlign = 'center';
 
-                        // 依據轉換後的反向象限位置標記文本
-                        // 左上 (Initiating) -> X大, Y大
+                        // 區塊：左上、中上、右上
                         ctx.fillText('啟動型 Initiating', x.getPixelForValue(23), y.getPixelForValue(23));
-                        // 中上 (Acting) -> X中, Y大
                         ctx.fillText('行動型 Acting', x.getPixelForValue(6.5), y.getPixelForValue(23));
-                        // 右上 (Deciding) -> X小, Y大
-                        ctx.fillText('決定型 Deciding', x.getPixelForValue(-10), y.getPixelForValue(23));
+                        ctx.fillText('決定型 Deciding', x.getPixelForValue(-11), y.getPixelForValue(23));
 
-                        // 左中 (Experiencing)
+                        // 區塊：左中、正中、右中
                         ctx.fillText('經驗型 Experiencing', x.getPixelForValue(23), y.getPixelForValue(6.5));
-                        // 正中 (Balancing)
                         ctx.fillText('均衡型 Balancing', x.getPixelForValue(6.5), y.getPixelForValue(6.5));
-                        // 右中 (Thinking)
-                        ctx.fillText('思考型 Thinking', x.getPixelForValue(-10), y.getPixelForValue(6.5));
+                        ctx.fillText('思考型 Thinking', x.getPixelForValue(-11), y.getPixelForValue(6.5));
 
-                        // 左下 (Imagining)
-                        ctx.fillText('想像型 Imagining', x.getPixelForValue(23), y.getPixelForValue(-10));
-                        // 中下 (Reflecting)
-                        ctx.fillText('反思型 Reflecting', x.getPixelForValue(6.5), y.getPixelForValue(-10));
-                        // 右下 (Analyzing)
-                        ctx.fillText('分析型 Analyzing', x.getPixelForValue(-10), y.getPixelForValue(-10));
+                        // 區塊：左下、中下、右下
+                        ctx.fillText('想像型 Imagining', x.getPixelForValue(23), y.getPixelForValue(-11));
+                        ctx.fillText('反思型 Reflecting', x.getPixelForValue(6.5), y.getPixelForValue(-11));
+                        ctx.fillText('分析型 Analyzing', x.getPixelForValue(-11), y.getPixelForValue(-11));
 
                         ctx.restore();
                     }
-                }
+                }]
             }
         });
     }
