@@ -399,11 +399,11 @@
             font-weight: 700;
         }
 
-        /* 縮小九宮格圖表高度至 240px，釋放寶貴的垂直空間 */
+        /* 縮小九宮格圖表高度至 225px，釋放寶貴的垂直空間以容納文獻出處 */
         .chart-wrapper {
             position: relative;
             width: 100%;
-            height: 240px;
+            height: 225px;
         }
 
         /* 分析特質區：專為一頁式 A4 改版，高度自適應緊湊配置 */
@@ -454,6 +454,28 @@
             color: #475569;
             font-size: 0.78rem;
             line-height: 1.35;
+        }
+
+        /* 學術出處頁尾樣式 */
+        .report-footer {
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 8px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+            text-align: justify;
+        }
+
+        .report-footer a {
+            color: var(--theme-color);
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .report-footer a:hover {
+            text-decoration: underline;
         }
 
         /* SVG 圖示 */
@@ -704,6 +726,11 @@
                     <div class="analysis-box" id="analysis-box"></div>
                 </div>
             </div>
+
+            <!-- 學術文獻出處頁尾 -->
+            <div class="report-footer">
+                資料出處：111年衛生福利部所舉辦的臨床醫事人員培訓計畫「護理職類護理臨床教師教學精進研習營」中「學習風格於教學策略之應用」(李紋霞副教授講授)之Kolb’s經驗學習理論(出處: Kolb Learning Style Inventory/LSI Workbook Version 3.2/Hay Group)，Kolb’s九類型特質說明詳如：<a href="https://drive.google.com/file/d/1-U2GDu7J1XQwDLYOdgqz3WlGxCWoNhU1/view?usp=sharing" target="_blank">https://drive.google.com/file/d/1-U2GDu7J1XQwDLYOdgqz3WlGxCWoNhU1/view?usp=sharing</a>
+            </div>
         </div>
 
         <!-- 手動下載按鈕（不加入 PDF 列印） -->
@@ -743,13 +770,14 @@
         { id: 12, text: "12. 我學的最好的時候，是當……I learn best when", options: [ { k: "RO", t: "我非常小心時 I am careful" }, { k: "AC", t: "我分析想法時 I analyze ideas" }, { k: "AE", t: "我實際動手做時 I am practical" }, { k: "CE", t: "我接受他人的看法、開放心胸時 I am receptive and open-minded" } ] }
     ];
 
-    // 九宮格學習風格特質完全定義 (精簡重塑，保留核心精華，完美適配一頁式 PDF)
+    // 九宮格學習風格特質完全定義
     const styleTraits = {
         "Initiating": {
             name: "啟動型 (Initiating)",
+            dimension: "主動體驗 (AE) ＆ 具體經驗 (CE)",
             desc: "在涉及與經驗或情境相關的議題時，具備開啟行動的能力。",
             strong: "將自己投入目標、尋找新的機會、影響並領導其他人。",
-            challenge: "控制衝動行動、傾聽他人的觀點、培養耐心 (Patience)。",
+            challenge: "控制衝動行動、傾聽他人的觀點、培養 Patience (耐心)。",
             traits: [
                 "偏好藉由動手操作或實際生活體驗進行學習，承擔風險尋求機會。",
                 "主動開啟新計畫與想法，並積極擔任任務的帶領者角色。",
@@ -759,6 +787,7 @@
         },
         "Experiencing": {
             name: "經驗型 (Experiencing)",
+            dimension: "具體經驗 (CE)",
             desc: "能從深度參與的經驗中提取意義。",
             strong: "建立個人學習網絡、在反思與行動上都具有敏銳直覺、容易接受新經驗。",
             challenge: "理解理論、系統性的規劃、批判性的判斷。",
@@ -771,6 +800,7 @@
         },
         "Imagining": {
             name: "想像型 (Imagining)",
+            dimension: "具體經驗 (CE) ＆ 反思觀察 (RO)",
             desc: "透過觀察與反思，而有能力想像各種經驗的可能性。",
             strong: "察覺人的感受和價值觀、放開心傾聽、善於想像並能處理兩可情境。",
             challenge: "做決定、擔任領導統御。",
@@ -783,6 +813,7 @@
         },
         "Reflecting": {
             name: "反思型 (Reflecting)",
+            dimension: "反思觀察 (RO)",
             desc: "具備藉由持續的反思連結經驗與想法的能力。",
             strong: "反思、觀點、蒐集資訊、了解他人狀況、將直覺轉為明確解釋。",
             challenge: "採取行動、過度反芻沉思、在團體中主動發聲。",
@@ -795,6 +826,7 @@
         },
         "Acting": {
             name: "行動型 (Acting)",
+            dimension: "主動體驗 (AE)",
             desc: "對於整合人們和任務之目標導向行動擁有強烈的動機。",
             strong: "結合技術型知識與人際關係、專注於將事情完成。",
             challenge: "引導工作小組、花時間反思、解決對的問題、收集分析訊息。",
@@ -807,6 +839,7 @@
         },
         "Deciding": {
             name: "決定型 (Deciding)",
+            dimension: "抽象概念化 (AC) ＆ 主動體驗 (AE)",
             desc: "藉由理論與模式來決定解決方案與行動方針。",
             strong: "解決問題、評估想法與解決方案。",
             challenge: "設定明確目標、做出決定、思考框架外的事物、處理混沌事務。",
@@ -819,6 +852,7 @@
         },
         "Thinking": {
             name: "思考型 (Thinking)",
+            dimension: "抽象概念化 (AC)",
             desc: "在抽象與邏輯推理的謹慎運用能力。",
             strong: "邏輯分析、理性選擇、分析量化資料。",
             challenge: "與人們一起工作、保持開放性思考、迷失在思考中。",
@@ -831,6 +865,7 @@
         },
         "Analyzing": {
             name: "分析型 (Analyzing)",
+            dimension: "反思觀察 (RO) ＆ 抽象概念化 (AC)",
             desc: "藉由反思將概念結合並組織在一起。",
             strong: "組織資訊、展現邏輯性與理性、建立觀念模型。",
             challenge: "嘗試冒險、與他人交際、處理無架構的狀況。",
@@ -843,6 +878,7 @@
         },
         "Balancing": {
             name: "均衡型 (Balancing)",
+            dimension: "四個學習面向平衡發展",
             desc: "有能力調整、權衡行動對比反思以及體驗對比思考的利弊。",
             strong: "在學習循環圈移動的彈性、和相異特質人們共事、創意性洞察力。",
             challenge: "猶豫不決、什麼都會但不專精、做出持續性的承諾。",
@@ -1045,7 +1081,7 @@
             else finalStyle = "Analyzing"; // 橫座標 < 0
         }
 
-        // 5. 輸出性格與風格特質描述到右側卡片
+        // 5. 輸出性格與風格特質描述到右側卡片 (納入核心學習面向)
         const styleInfo = styleTraits[finalStyle];
         let traitsHtml = ``;
         styleInfo.traits.forEach(t => traitsHtml += `<li>${t}</li>`);
@@ -1056,6 +1092,7 @@
                 <h3 class="analysis-badge-title">您的學習天賦角色：<strong>${styleInfo.name}</strong></h3>
             </div>
             <div class="style-details">
+                <p><strong>🎯 核心學習面向：</strong>${styleInfo.dimension}</p>
                 <p><strong>風格核心特徵：</strong>${styleInfo.desc}</p>
                 <h4>🌟 您的核心強項：</h4>
                 <p>${styleInfo.strong}</p>
@@ -1197,7 +1234,7 @@
                         title: { 
                             display: true, 
                             text: '← AE - RO (橫座標軸)',
-                            font: { weight: 'bold', size: 9, color: '#334155' }
+                            font: { weight: 'bold', size: 10, color: '#334155' }
                         },
                         ticks: { 
                             stepSize: 10,
@@ -1216,7 +1253,7 @@
                         title: { 
                             display: true, 
                             text: '↑ AC - CE (縱座標軸)',
-                            font: { weight: 'bold', size: 9, color: '#334155' }
+                            font: { weight: 'bold', size: 10, color: '#334155' }
                         },
                         ticks: { 
                             stepSize: 10,
