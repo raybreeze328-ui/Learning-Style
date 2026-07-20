@@ -721,7 +721,7 @@
                     </div>
                 </div>
 
-                <!-- 右半部：風格特質剖析 (詳細對齊課前特質 PDF 手冊，精簡提煉版) -->
+                <!-- 右半部：風格特質剖析 -->
                 <div class="pdf-right-col">
                     <div class="analysis-box" id="analysis-box"></div>
                 </div>
@@ -802,7 +802,7 @@
             name: "想像型 (Imagining)",
             dimension: "具體經驗 (CE) ＆ 反思觀察 (RO)",
             desc: "透過觀察與反思，而有能力想像各種經驗的可能性。",
-            strong: "察覺人的感受和價值觀、放開心傾聽、善於想像並能處理兩可情境。",
+            strong: "察劇人的感受和價值觀、放開心傾聽、善於想像並能處理兩可情境。",
             challenge: "做決定、擔任領導統御。",
             traits: [
                 "透過觀察與反思過去經驗進行學習，能考量分歧觀點與跨越差異。",
@@ -891,69 +891,82 @@
         }
     };
 
-    // 渲染問卷 HTML
-    const container = document.getElementById("questions-container");
-    questionsData.forEach((q) => {
-        let html = `
-            <div class="quiz-item" id="q-box-${q.id}">
-                <div class="quiz-question">📝 ${q.text}</div>
-                <div class="table-responsive">
-                    <table class="options-table">
-                        <thead>
-                            <tr>
-                                <th>描述內容 Description</th>
-                                <th>4 (最像我)</th>
-                                <th>3 (次像我)</th>
-                                <th>2 (次不像我)</th>
-                                <th>1 (最不像我)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-        `;
-        q.options.forEach((opt, idx) => {
-            html += `
-                <tr>
-                    <td class="option-text">${opt.t}</td>
-                    <td>
-                        <label class="radio-container">
-                            <input type="radio" name="q-${q.id}-opt-${idx}" value="4" data-key="${opt.k}" onclick="validateRow(${q.id})">
-                            <span class="checkmark"></span>
-                        </label>
-                    </td>
-                    <td>
-                        <label class="radio-container">
-                            <input type="radio" name="q-${q.id}-opt-${idx}" value="3" data-key="${opt.k}" onclick="validateRow(${q.id})">
-                            <span class="checkmark"></span>
-                        </label>
-                    </td>
-                    <td>
-                        <label class="radio-container">
-                            <input type="radio" name="q-${q.id}-opt-${idx}" value="2" data-key="${opt.k}" onclick="validateRow(${q.id})">
-                            <span class="checkmark"></span>
-                        </label>
-                    </td>
-                    <td>
-                        <label class="radio-container">
-                            <input type="radio" name="q-${q.id}-opt-${idx}" value="1" data-key="${opt.k}" onclick="validateRow(${q.id})">
-                            <span class="checkmark"></span>
-                        </label>
-                    </td>
-                </tr>
-            `;
-        });
-        html += `
-                        </tbody>
-                    </table>
-                </div>
-                <div class="error-msg" id="error-${q.id}">⚠️ 請注意：本題分數（1, 2, 3, 4）重複填選或未填寫完整！每列權重值不可重複。</div>
-            </div>
-        `;
-        container.insertAdjacentHTML("beforeend", html);
-    });
+    let gridChartInstance = null;
 
-    // 題目防呆
+    // 渲染問卷卡片容器 HTML
+    const container = document.getElementById("questions-container");
+    if (container) {
+        questionsData.forEach((q) => {
+            let html = `
+                <div class="quiz-item" id="q-box-${q.id}">
+                    <div class="quiz-question">📝 ${q.text}</div>
+                    <div class="table-responsive">
+                        <table class="options-table">
+                            <thead>
+                                <tr>
+                                    <th>描述內容 Description</th>
+                                    <th>4 (最像我)</th>
+                                    <th>3 (次像我)</th>
+                                    <th>2 (次不像我)</th>
+                                    <th>1 (最不像我)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            q.options.forEach((opt, idx) => {
+                html += `
+                    <tr>
+                        <td class="option-text">${opt.t}</td>
+                        <td>
+                            <label class="radio-container">
+                                <input type="radio" name="q-${q.id}-opt-${idx}" value="4" data-key="${opt.k}" onclick="validateRow(${q.id})">
+                                <span class="checkmark"></span>
+                            </label>
+                        </td>
+                        <td>
+                            <label class="radio-container">
+                                <input type="radio" name="q-${q.id}-opt-${idx}" value="3" data-key="${opt.k}" onclick="validateRow(${q.id})">
+                                <span class="checkmark"></span>
+                            </label>
+                        </td>
+                        <td>
+                            <label class="radio-container">
+                                <input type="radio" name="q-${q.id}-opt-${idx}" value="2" data-key="${opt.k}" onclick="validateRow(${q.id})">
+                                <span class="checkmark"></span>
+                            </label>
+                        </td>
+                        <td>
+                            <label class="radio-container">
+                                <input type="radio" name="q-${q.id}-opt-${idx}" value="1" data-key="${opt.k}" onclick="validateRow(${q.id})">
+                                <span class="checkmark"></span>
+                            </label>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="error-msg" id="error-${q.id}">⚠️ 請注意：本題分數（1, 2, 3, 4）重複填選或未填寫完整！每列權重值不可重複。</div>
+                </div>
+            `;
+            container.insertAdjacentHTML("beforeend", html);
+        });
+    }
+
+    // 核心安全 DOM 防護函數：安全設置樣式與屬性，徹底根絕 Cannot read properties of null 錯誤
+    function safeStyle(id, callback) {
+        const el = document.getElementById(id);
+        if (el) {
+            callback(el);
+        } else {
+            console.warn(`[SafeDOM Protection] 找不到目標 DOM 元素: #${id}`);
+        }
+    }
+
+    // 題目動態防呆與實時驗證
     function validateRow(qId) {
-        const errorDiv = document.getElementById(`error-${qId}`);
         const selectedValues = [];
         let filledCount = 0;
         
@@ -968,34 +981,24 @@
         }
         
         const hasDuplicates = new Set(selectedValues).size !== selectedValues.length;
-        if (hasDuplicates || (filledCount === 4 && selectedValues.length !== 4)) {
-            errorDiv.style.display = "block";
-            return false;
-        } else {
-            errorDiv.style.display = "none";
-            return true;
-        }
+        const isError = hasDuplicates || (filledCount === 4 && selectedValues.length !== 4);
+        
+        safeStyle(`error-${qId}`, (el) => {
+            el.style.display = isError ? "block" : "none";
+        });
+        
+        return !isError;
     }
-
-    // Modal 控制
-    function showModal(title, msg, icon = "⚠️") {
-        document.getElementById("modal-title").innerText = title;
-        document.getElementById("modal-message").innerText = msg;
-        document.getElementById("modal-icon").innerText = icon;
-        document.getElementById("custom-modal").classList.add("active");
-    }
-
-    function closeModal() {
-        document.getElementById("custom-modal").classList.remove("active");
-    }
-
-    let gridChartInstance = null;
 
     // 計算分數與定位分析
     function calculateResult() {
-        const deptInput = document.getElementById("user-dept").value.trim();
-        const nameInput = document.getElementById("user-name").value.trim();
-        const idInput = document.getElementById("user-id").value.trim();
+        const deptEl = document.getElementById("user-dept");
+        const nameEl = document.getElementById("user-name");
+        const idEl = document.getElementById("user-id");
+
+        const deptInput = deptEl ? deptEl.value.trim() : "";
+        const nameInput = nameEl ? nameEl.value.trim() : "";
+        const idInput = idEl ? idEl.value.trim() : "";
 
         if (!deptInput || !nameInput || !idInput) {
             showModal("填寫資訊未完整", "請先於最上方區塊填入您的「單位 / 科室」、「姓名」與「人事號」！", "👤");
@@ -1006,7 +1009,7 @@
         let scores = { CE: 0, RO: 0, AC: 0, AE: 0 };
         let answers = [];
 
-        // 1. 驗證所有題目答題狀況
+        // 1. 驗證與統計 12 題答題狀況
         for (let q of questionsData) {
             let rowVals = [];
             let qAnswers = {};
@@ -1022,12 +1025,15 @@
             }
             
             const isRowValid = rowVals.length === 4 && (new Set(rowVals).size === 4);
-            const errorDiv = document.getElementById(`error-${q.id}`);
+            
+            // 安全控制題目出錯警示
+            safeStyle(`error-${q.id}`, (el) => {
+                el.style.display = isRowValid ? "none" : "block";
+            });
+
             if (!isRowValid) {
-                errorDiv.style.display = "block";
                 allValid = false;
             } else {
-                errorDiv.style.display = "none";
                 answers.push({
                     questionId: q.id,
                     CE: qAnswers.CE,
@@ -1043,70 +1049,72 @@
             return;
         }
 
-        // 2. 【核心座標指標計算：對應標準定義】
-        // 橫軸 (X) = AE - RO
-        // 縱軸 (Y) = AC - CE
+        // 2. 核心指標計算 (AE - RO 與 AC - CE)
         let coordX = scores.AE - scores.RO;
         let coordY = scores.AC - scores.CE;
 
-        // 3. 渲染網頁與 PDF 上基本受測資料
-        document.getElementById("score-CE").innerText = scores.CE;
-        document.getElementById("score-RO").innerText = scores.RO;
-        document.getElementById("score-AC").innerText = scores.AC;
-        document.getElementById("score-AE").innerText = scores.AE;
-        document.getElementById("coord-X").innerText = coordX;
-        document.getElementById("coord-Y").innerText = coordY;
+        // 3. 渲染網頁基本資料 (加入 DOM 安全護欄防止意外 null 讀取)
+        safeStyle("score-CE", el => el.innerText = scores.CE);
+        safeStyle("score-RO", el => el.innerText = scores.RO);
+        safeStyle("score-AC", el => el.innerText = scores.AC);
+        safeStyle("score-AE", el => el.innerText = scores.AE);
+        safeStyle("coord-X", el => el.innerText = coordX);
+        safeStyle("coord-Y", el => el.innerText = coordY);
 
-        document.getElementById("meta-dept").innerText = deptInput;
-        document.getElementById("meta-name").innerText = nameInput;
-        document.getElementById("meta-id").innerText = idInput;
-        document.getElementById("meta-time").innerText = new Date().toLocaleString();
+        safeStyle("meta-dept", el => el.innerText = deptInput);
+        safeStyle("meta-name", el => el.innerText = nameInput);
+        safeStyle("meta-id", el => el.innerText = idInput);
+        safeStyle("meta-time", el => el.innerText = new Date().toLocaleString());
 
-        // 4. 【九宮格落點判定算法校正】
+        // 4. 九宮格精準落點判定
         let finalStyle = "Balancing"; 
 
-        if (coordY < 1) { // (1) 縱座標 < 1 (頂列)
-            if (coordX >= 12) finalStyle = "Initiating"; // 橫座標 >= 12
-            else if (coordX >= 0) finalStyle = "Experiencing"; // 0 <= 橫座標 < 12
-            else finalStyle = "Imagining"; // 橫座標 < 0
+        if (coordY < 1) { 
+            if (coordX >= 12) finalStyle = "Initiating"; 
+            else if (coordX >= 0) finalStyle = "Experiencing"; 
+            else finalStyle = "Imagining"; 
         } 
-        else if (coordY >= 1 && coordY <= 12) { // (2) 1 <= 縱座標 <= 12 (中列)
-            if (coordX >= 12) finalStyle = "Acting"; // 橫座標 >= 12
-            else if (coordX >= 0) finalStyle = "Balancing"; // 0 <= 橫座標 < 12
-            else finalStyle = "Reflecting"; // 橫座標 < 0
+        else if (coordY >= 1 && coordY <= 12) { 
+            if (coordX >= 12) finalStyle = "Acting"; 
+            else if (coordX >= 0) finalStyle = "Balancing"; 
+            else finalStyle = "Reflecting"; 
         } 
-        else if (coordY > 12) { // (3) 縱座標 > 12 (底列)
-            if (coordX >= 12) finalStyle = "Deciding"; // 橫座標 >= 12
-            else if (coordX >= 0) finalStyle = "Thinking"; // 0 <= 橫座標 < 12
-            else finalStyle = "Analyzing"; // 橫座標 < 0
+        else if (coordY > 12) { 
+            if (coordX >= 12) finalStyle = "Deciding"; 
+            else if (coordX >= 0) finalStyle = "Thinking"; 
+            else finalStyle = "Analyzing"; 
         }
 
-        // 5. 輸出性格與風格特質描述到右側卡片 (納入核心學習面向)
+        // 5. 輸出性格描述到診斷卡片
         const styleInfo = styleTraits[finalStyle];
         let traitsHtml = ``;
         styleInfo.traits.forEach(t => traitsHtml += `<li>${t}</li>`);
 
-        document.getElementById("analysis-box").innerHTML = `
-            <div class="analysis-badge-header">
-                <svg class="svg-icon" viewBox="0 0 20 20" style="color: #b45309;"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>
-                <h3 class="analysis-badge-title">您的學習天賦角色：<strong>${styleInfo.name}</strong></h3>
-            </div>
-            <div class="style-details">
-                <p><strong>🎯 核心學習面向：</strong>${styleInfo.dimension}</p>
-                <p><strong>風格核心特徵：</strong>${styleInfo.desc}</p>
-                <h4>🌟 您的核心強項：</h4>
-                <p>${styleInfo.strong}</p>
-                <h4>⚠️ 面臨的潛在挑戰：</h4>
-                <p>${styleInfo.challenge}</p>
-                <h4>📋 具體行為特質展現：</h4>
-                <ul>${traitsHtml}</ul>
-            </div>
-        `;
+        safeStyle("analysis-box", (el) => {
+            el.innerHTML = `
+                <div class="analysis-badge-header">
+                    <svg class="svg-icon" viewBox="0 0 20 20" style="color: #b45309;"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>
+                    <h3 class="analysis-badge-title">您的學習天賦角色：<strong>${styleInfo.name}</strong></h3>
+                </div>
+                <div class="style-details">
+                    <p><strong>🎯 核心學習面向：</strong>${styleInfo.dimension}</p>
+                    <p><strong>風格核心特徵：</strong>${styleInfo.desc}</p>
+                    <h4>🌟 您的核心強項：</h4>
+                    <p>${styleInfo.strong}</p>
+                    <h4>⚠️ 面臨的潛在挑戰：</h4>
+                    <p>${styleInfo.challenge}</p>
+                    <h4>📋 具體行為特質展現：</h4>
+                    <ul>${traitsHtml}</ul>
+                </div>
+            `;
+        });
 
-        document.getElementById("result-section").style.display = "block";
-        document.getElementById("result-section").scrollIntoView({ behavior: 'smooth' });
+        safeStyle("result-section", (el) => {
+            el.style.display = "block";
+            el.scrollIntoView({ behavior: 'smooth' });
+        });
 
-        // 6. 圖表重繪 (九宮格定位座標圖)
+        // 6. 重新繪製定位圖表
         renderGridChart(coordX, coordY);
 
         // 7. 同步上傳至 Google Sheets 試算表，並自動下載 PDF 診斷書
@@ -1116,19 +1124,22 @@
     // 上傳問卷數據至 GAS API
     function sendDataToGoogleScript(scores, coordX, coordY, styleName, answers) {
         const gasUrl = "https://script.google.com/macros/s/AKfycbwYYuqgxnqNiFoWNi-WWuvR17zw26MMxIxB9mkosR5v6yC_tJWsmgc23GRc18ZSsuSv/exec";
-        const statusBanner = document.getElementById("upload-status-banner");
         const submitBtn = document.getElementById("btn-submit-form");
 
-        statusBanner.style.display = "block";
-        statusBanner.innerText = "⏳ 正在傳輸分析資料至雲端並產生 PDF...";
-        statusBanner.style.backgroundColor = "#eff6ff";
-        statusBanner.style.color = "#1d4ed8";
-        submitBtn.disabled = true;
+        safeStyle("upload-status-banner", (el) => {
+            el.style.display = "block";
+            el.innerText = "⏳ 正在傳輸分析資料至雲端並產生 PDF...";
+            el.style.backgroundColor = "#eff6ff";
+            el.style.color = "#1d4ed8";
+        });
 
-        const deptInput = document.getElementById("user-dept").value.trim();
-        const nameInput = document.getElementById("user-name").value.trim();
-        const idInput = document.getElementById("user-id").value.trim();
+        if (submitBtn) submitBtn.disabled = true;
 
+        const deptInput = document.getElementById("user-dept") ? document.getElementById("user-dept").value.trim() : "";
+        const nameInput = document.getElementById("user-name") ? document.getElementById("user-name").value.trim() : "";
+        const idInput = document.getElementById("user-id") ? document.getElementById("user-id").value.trim() : "";
+
+        // 完美對應 GAS doPost 所需接收格式
         const payload = {
             scores: {
                 CE: scores.CE,
@@ -1140,9 +1151,9 @@
             coordY: coordY, // AC - CE (縱座標)
             styleName: styleName,
             answers: answers,
-            userDept: deptInput,
-            userName: nameInput,
-            userId: idInput
+            unit: deptInput,        // 對應 GAS 的 params.unit -> B欄 (單位代號)
+            name: nameInput,        // 對應 GAS 的 params.name -> C欄 (姓名)
+            employeeId: idInput     // 對應 GAS 的 params.employeeId -> D欄 (人事號)
         };
 
         fetch(gasUrl, {
@@ -1156,10 +1167,12 @@
         .then(response => response.json())
         .then(data => {
             if (data.result === "success") {
-                statusBanner.innerText = "🎉 資料已成功傳輸至系統！";
-                statusBanner.style.backgroundColor = "#ecfdf5";
-                statusBanner.style.color = "#047857";
-                submitBtn.disabled = false;
+                safeStyle("upload-status-banner", (el) => {
+                    el.innerText = "🎉 資料已成功傳輸至系統！";
+                    el.style.backgroundColor = "#ecfdf5";
+                    el.style.color = "#047857";
+                });
+                if (submitBtn) submitBtn.disabled = false;
                 
                 // 自動導出 PDF 報告
                 generatePDF();
@@ -1171,18 +1184,25 @@
         .catch(error => {
             console.error("GAS Post Error: ", error);
             // 降級容錯處理
-            statusBanner.innerText = "⚠️ 分析完成（數據已同步傳輸，PDF診斷報告已生成）";
-            statusBanner.style.backgroundColor = "#fffbeb";
-            statusBanner.style.color = "#b45309";
-            submitBtn.disabled = false;
+            safeStyle("upload-status-banner", (el) => {
+                el.innerText = "⚠️ 分析完成（數據已同步傳輸，PDF診斷報告已生成）";
+                el.style.backgroundColor = "#fffbeb";
+                el.style.color = "#b45309";
+            });
+            if (submitBtn) submitBtn.disabled = false;
             generatePDF();
         });
     }
 
-    // 下載一頁式 PDF 診斷書 (調整邊距為 6mm 以完全收納於 1 頁)
+    // 下載一頁式 PDF 診斷書
     function generatePDF() {
         const element = document.getElementById('pdf-report');
-        const name = document.getElementById("user-name").value.trim() || "個人分析";
+        if (!element) {
+            console.error("找不到 pdf-report 容器，無法導出 PDF。");
+            return;
+        }
+        const nameInput = document.getElementById("user-name");
+        const name = nameInput ? nameInput.value.trim() : "個人分析";
         
         const opt = {
             margin:       6, 
@@ -1205,7 +1225,12 @@
 
     // 繪製九宮格定位圖（中心為(6, 7)，橫軸左正右負，縱軸下正上負）
     function renderGridChart(coordX, coordY) {
-        const ctx = document.getElementById('gridChart').getContext('2d');
+        const chartCanvas = document.getElementById('gridChart');
+        if (!chartCanvas) {
+            console.error("找不到 gridChart Canvas，無法渲染圖表。");
+            return;
+        }
+        const ctx = chartCanvas.getContext('2d');
         if (gridChartInstance) gridChartInstance.destroy();
 
         gridChartInstance = new Chart(ctx, {
@@ -1275,7 +1300,6 @@
                         }
                     }
                 },
-                // 背景自訂高精度 Canvas 九宮格與兩大主座標軸線繪製
                 plugins: [{
                     id: 'nineGridBackground',
                     beforeDraw: (chart) => {
@@ -1287,28 +1311,28 @@
                         
                         ctx.save();
                         
-                        // ===== A. 填滿九個區塊的柔和 Morandi 漸層背景色調 =====
+                        // 填滿九個區塊的柔和 Morandi 漸層背景色調
                         const drawRegion = (left, right, top, bottom, color) => {
                             ctx.fillStyle = color;
                             ctx.fillRect(left, top, right - left, bottom - top);
                         };
 
-                        // 頂列：Y < 1 (Initiating, Experiencing, Imagining)
-                        drawRegion(x.left, xLines[0], y.top, yLines[1], 'rgba(244, 219, 219, 0.4)'); // 啟動型 (淺桃粉)
-                        drawRegion(xLines[0], xLines[1], y.top, yLines[1], 'rgba(219, 234, 254, 0.4)'); // 經驗型 (淺天藍)
-                        drawRegion(xLines[1], x.right, y.top, yLines[1], 'rgba(243, 232, 255, 0.4)'); // 想像型 (淺薰紫)
+                        // 頂列
+                        drawRegion(x.left, xLines[0], y.top, yLines[1], 'rgba(244, 219, 219, 0.4)'); 
+                        drawRegion(xLines[0], xLines[1], y.top, yLines[1], 'rgba(219, 234, 254, 0.4)'); 
+                        drawRegion(xLines[1], x.right, y.top, yLines[1], 'rgba(243, 232, 255, 0.4)'); 
 
-                        // 中列：1 <= Y <= 12 (Acting, Balancing, Reflecting)
-                        drawRegion(x.left, xLines[0], yLines[1], yLines[0], 'rgba(220, 252, 231, 0.4)'); // 行動型 (淺春綠)
-                        drawRegion(xLines[0], xLines[1], yLines[1], yLines[0], 'rgba(241, 245, 249, 0.5)'); // 均衡型 (淺 slate 灰)
-                        drawRegion(xLines[1], x.right, yLines[1], yLines[0], 'rgba(254, 243, 199, 0.4)'); // 反思型 (淺金黃)
+                        // 中列
+                        drawRegion(x.left, xLines[0], yLines[1], yLines[0], 'rgba(220, 252, 231, 0.4)'); 
+                        drawRegion(xLines[0], xLines[1], yLines[1], yLines[0], 'rgba(241, 245, 249, 0.5)'); 
+                        drawRegion(xLines[1], x.right, yLines[1], yLines[0], 'rgba(254, 243, 199, 0.4)'); 
 
-                        // 底列：Y > 12 (Deciding, Thinking, Analyzing)
-                        drawRegion(x.left, xLines[0], yLines[0], y.bottom, 'rgba(204, 251, 241, 0.4)'); // 決定型 (淺碧綠)
-                        drawRegion(xLines[0], xLines[1], yLines[0], y.bottom, 'rgba(224, 231, 255, 0.4)'); // 思考型 (淺靛藍)
-                        drawRegion(xLines[1], x.right, yLines[0], y.bottom, 'rgba(255, 228, 230, 0.4)'); // 分析型 (淺玫瑰粉)
+                        // 底列
+                        drawRegion(x.left, xLines[0], yLines[0], y.bottom, 'rgba(204, 251, 241, 0.4)'); 
+                        drawRegion(xLines[0], xLines[1], yLines[0], y.bottom, 'rgba(224, 231, 255, 0.4)'); 
+                        drawRegion(xLines[1], x.right, yLines[0], y.bottom, 'rgba(255, 228, 230, 0.4)'); 
 
-                        // ===== B. 畫背景九宮格九格分割虛線 =====
+                        // 畫背景九宮格九格分割虛線
                         ctx.strokeStyle = '#cbd5e1';
                         ctx.lineWidth = 1.0;
                         ctx.setLineDash([4, 4]); 
@@ -1327,7 +1351,7 @@
                             ctx.stroke();
                         });
 
-                        // ===== C. 高精度繪製 (6, 7) 中心交界座標主軸 =====
+                        // 高精度繪製 (6, 7) 中心交界座標主軸
                         const axisX6 = x.getPixelForValue(6);
                         const axisY7 = y.getPixelForValue(7);
 
@@ -1347,7 +1371,7 @@
                         ctx.lineTo(axisX6, y.bottom);
                         ctx.stroke();
 
-                        // ===== D. 繪製四端主軸的向量箭頭與指引 =====
+                        // 繪製四端主軸的向量箭頭與指引
                         const arrowSize = 5;
                         ctx.fillStyle = '#334155';
 
@@ -1379,22 +1403,19 @@
                         ctx.lineTo(axisX6 + arrowSize, y.bottom - arrowSize * 1.5);
                         ctx.fill();
 
-                        // ===== E. 填充九宮格名稱 =====
+                        // 填充九宮格名稱
                         ctx.fillStyle = '#1e293b';
-                        ctx.font = 'bold 9px sans-serif'; // 微調字體大小以防在較小的畫布上重疊
+                        ctx.font = 'bold 9px sans-serif';
                         ctx.textAlign = 'center';
 
-                        // 頂列：Y = -11 (縱座標 < 1)
                         ctx.fillText('啟動型 Initiating', x.getPixelForValue(23.5), y.getPixelForValue(-11));
                         ctx.fillText('經驗型 Experiencing', x.getPixelForValue(6), y.getPixelForValue(-11));
                         ctx.fillText('想像型 Imagining', x.getPixelForValue(-11), y.getPixelForValue(-11));
 
-                        // 中列：Y = 6.5 (1 <= 縱座標 <= 12)
                         ctx.fillText('行動型 Acting', x.getPixelForValue(23.5), y.getPixelForValue(6.5));
                         ctx.fillText('均衡型 Balancing', x.getPixelForValue(6), y.getPixelForValue(6.5));
                         ctx.fillText('反思型 Reflecting', x.getPixelForValue(-11), y.getPixelForValue(6.5));
 
-                        // 底列：Y = 23.5 (縱座標 > 12)
                         ctx.fillText('決定型 Deciding', x.getPixelForValue(23.5), y.getPixelForValue(23.5));
                         ctx.fillText('思考型 Thinking', x.getPixelForValue(6), y.getPixelForValue(23.5));
                         ctx.fillText('分析型 Analyzing', x.getPixelForValue(-11), y.getPixelForValue(23.5));
